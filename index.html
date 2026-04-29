@@ -1,206 +1,163 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>D1n4xx</title>
+<title>D1n4xx</title>
 
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial;
-            background: #000;
-            color: white;
-        }
+<style>
+body { margin:0; font-family:Arial; background:#000; color:white; }
 
-        /* Header */
-        .header {
-            position: sticky;
-            top: 0;
-            background: #000;
-            padding: 15px;
-            text-align: center;
-            font-size: 22px;
-            font-weight: bold;
-            border-bottom: 1px solid #333;
-        }
+.header {
+    text-align:center;
+    padding:15px;
+    font-size:22px;
+    border-bottom:1px solid #333;
+}
 
-        /* Stories */
-        .stories {
-            display: flex;
-            overflow-x: auto;
-            padding: 10px;
-            border-bottom: 1px solid #222;
-        }
+/* Upload */
+.upload {
+    text-align:center;
+    padding:10px;
+}
 
-        .story {
-            text-align: center;
-            margin-right: 10px;
-        }
+/* Feed */
+.feed { max-width:500px; margin:auto; }
 
-        .story div {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background: gray;
-            margin-bottom: 5px;
-        }
+.post { border-bottom:1px solid #222; margin-bottom:20px; }
 
-        /* Feed */
-        .feed {
-            max-width: 500px;
-            margin: auto;
-        }
+.topbar { display:flex; padding:10px; }
+.profile { width:35px; height:35px; border-radius:50%; background:#555; }
+.username { margin-left:10px; font-weight:bold; }
 
-        .post {
-            border-bottom: 1px solid #222;
-            margin-bottom: 20px;
-        }
+.post img { width:100%; }
 
-        .topbar {
-            display: flex;
-            align-items: center;
-            padding: 10px;
-        }
+.actions { padding:10px; font-size:20px; }
+.liked { color:red; }
 
-        .profile {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: #555;
-        }
+.caption { padding:0 10px; }
 
-        .username {
-            margin-left: 10px;
-            font-weight: bold;
-        }
+.comments {
+    padding:10px;
+}
 
-        .post img {
-            width: 100%;
-            cursor: pointer;
-        }
+input {
+    width:80%;
+    padding:5px;
+}
+button {
+    padding:5px;
+}
 
-        .actions {
-            padding: 10px;
-            font-size: 20px;
-        }
+/* Heart animation */
+.heart {
+    position:absolute;
+    font-size:80px;
+    color:red;
+    opacity:0;
+    transform:scale(0);
+    transition:0.3s;
+}
+.show { opacity:1; transform:scale(1); }
 
-        .like {
-            cursor: pointer;
-        }
-
-        .liked {
-            color: red;
-        }
-
-        .caption {
-            padding: 0 10px 10px;
-            font-size: 14px;
-        }
-
-        /* Viewer */
-        .viewer {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: black;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .viewer img {
-            max-width: 95%;
-            max-height: 95%;
-        }
-
-        .close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 30px;
-            cursor: pointer;
-        }
-    </style>
+</style>
 </head>
 
 <body>
 
 <div class="header">📸 D1n4xx</div>
 
-<!-- Stories -->
-<div class="stories">
-    <div class="story"><div></div><small>You</small></div>
-    <div class="story"><div></div><small>Friend1</small></div>
-    <div class="story"><div></div><small>Friend2</small></div>
-    <div class="story"><div></div><small>Friend3</small></div>
+<!-- Upload -->
+<div class="upload">
+    <input type="file" id="fileInput">
+    <button onclick="upload()">Upload</button>
 </div>
 
-<div class="feed">
-
-    <!-- Post 1 -->
-    <div class="post">
-        <div class="topbar">
-            <div class="profile"></div>
-            <div class="username">d1n4xx</div>
-        </div>
-
-        <img src="https://picsum.photos/500/400?random=1" onclick="openViewer(this.src)">
-
-        <div class="actions">
-            <span class="like" onclick="toggleLike(this)">♡</span>
-            <span> 💬</span>
-            <span> 📤</span>
-        </div>
-
-        <div class="caption"><b>d1n4xx</b> First post 🔥</div>
-    </div>
-
-    <!-- Post 2 -->
-    <div class="post">
-        <div class="topbar">
-            <div class="profile"></div>
-            <div class="username">d1n4xx</div>
-        </div>
-
-        <img src="https://picsum.photos/500/450?random=2" onclick="openViewer(this.src)">
-
-        <div class="actions">
-            <span class="like" onclick="toggleLike(this)">♡</span>
-            <span> 💬</span>
-            <span> 📤</span>
-        </div>
-
-        <div class="caption"><b>d1n4xx</b> Clean vibes 😎</div>
-    </div>
-
-</div>
-
-<!-- Fullscreen Viewer -->
-<div class="viewer" id="viewer">
-    <span class="close" onclick="closeViewer()">&times;</span>
-    <img id="viewer-img">
-</div>
+<div class="feed" id="feed"></div>
 
 <script>
-function toggleLike(el) {
-    if (el.classList.contains("liked")) {
-        el.classList.remove("liked");
-        el.innerText = "♡";
+let feed = document.getElementById("feed");
+
+// Default posts
+let posts = [
+    "https://picsum.photos/500/400?1",
+    "https://picsum.photos/500/450?2"
+];
+
+// Load saved posts
+if(localStorage.getItem("posts")){
+    posts = JSON.parse(localStorage.getItem("posts"));
+}
+
+function render(){
+    feed.innerHTML = "";
+    posts.forEach((src, i)=>{
+        feed.innerHTML += `
+        <div class="post">
+
+            <div class="topbar">
+                <div class="profile"></div>
+                <div class="username">d1n4xx</div>
+            </div>
+
+            <div style="position:relative;">
+                <img src="${src}" ondblclick="likeDouble(this)">
+                <div class="heart">❤️</div>
+            </div>
+
+            <div class="actions">
+                <span onclick="toggleLike(this)">♡</span>
+            </div>
+
+            <div class="caption">Cool post 😎</div>
+
+            <div class="comments">
+                <div id="comments-${i}"></div>
+                <input placeholder="Add comment..." onkeydown="addComment(event, ${i})">
+            </div>
+
+        </div>`;
+    });
+}
+
+function toggleLike(el){
+    if(el.innerText=="♡"){
+        el.innerText="❤️";
     } else {
-        el.classList.add("liked");
-        el.innerText = "❤️";
+        el.innerText="♡";
     }
 }
 
-function openViewer(src) {
-    document.getElementById("viewer").style.display = "flex";
-    document.getElementById("viewer-img").src = src;
+// Double tap ❤️
+function likeDouble(img){
+    let heart = img.nextElementSibling;
+    heart.classList.add("show");
+    setTimeout(()=>heart.classList.remove("show"),600);
 }
 
-function closeViewer() {
-    document.getElementById("viewer").style.display = "none";
+// Comments
+function addComment(e, i){
+    if(e.key === "Enter"){
+        let text = e.target.value;
+        let box = document.getElementById("comments-"+i);
+        box.innerHTML += `<div>💬 ${text}</div>`;
+        e.target.value="";
+    }
 }
+
+// Upload system (local)
+function upload(){
+    let file = document.getElementById("fileInput").files[0];
+    if(!file) return;
+
+    let reader = new FileReader();
+    reader.onload = function(e){
+        posts.unshift(e.target.result);
+        localStorage.setItem("posts", JSON.stringify(posts));
+        render();
+    };
+    reader.readAsDataURL(file);
+}
+
+render();
 </script>
 
 </body>
