@@ -29,7 +29,7 @@ body {
 .page { display:none; }
 .active { display:block; }
 
-/* Header */
+/* HEADER */
 .header {
     text-align:center;
     padding:12px;
@@ -40,51 +40,60 @@ body {
 
 .feed {
     height:100vh;
-    overflow-y:scroll;
-    scroll-snap-type:y mandatory;
+    overflow-y:auto;
+    padding-bottom:80px;
 }
 
+/* Instagram card post */
 .post {
-    height:100vh;
-    scroll-snap-align:start;
-    position:relative;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:black;
+    background:#111;
+    margin:12px 10px;
+    border-radius:12px;
+    overflow:hidden;
 }
 
+/* image */
 .post img {
     width:100%;
-    height:100%;
-    object-fit:cover;
+    display:block;
 }
 
-/* heart */
-.heart {
-    position:absolute;
-    font-size:90px;
-    color:red;
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%) scale(0);
-    opacity:0;
-    transition:0.3s;
-    pointer-events:none;
+/* actions */
+.actions {
+    display:flex;
+    justify-content:space-between;
+    padding:10px;
+    font-size:22px;
 }
 
-.heart.show {
-    transform:translate(-50%,-50%) scale(1);
-    opacity:1;
+.left-actions {
+    display:flex;
+    gap:15px;
+    cursor:pointer;
+}
+
+/* info */
+.info {
+    padding:0 10px 10px 10px;
+}
+
+.username {
+    font-weight:bold;
+}
+
+.caption {
+    color:#ccc;
+    font-size:14px;
+    margin-top:3px;
 }
 
 /* comment */
-.comment {
-    position:absolute;
-    bottom:70px;
-    left:10px;
-    width:90%;
-    padding:5px;
+.comment-box {
+    width:95%;
+    margin:5px 10px 10px 10px;
+    padding:6px;
+    border-radius:6px;
+    border:none;
 }
 
 /* ================= REELS ================= */
@@ -201,16 +210,16 @@ body {
 
 <script>
 
-/* Splash */
+/* splash */
 setTimeout(()=> splash.style.display="none",2000);
 
-/* Navigation */
+/* navigation */
 function show(id){
     document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
     document.getElementById(id).classList.add("active");
 }
 
-/* ================= FEED ================= */
+/* ================= DATA ================= */
 
 let feed = document.getElementById("feed");
 let grid = document.getElementById("grid");
@@ -221,25 +230,40 @@ function img(){
     return "https://picsum.photos/seed/" + Math.random() + "/500/900";
 }
 
-/* initial posts */
-for(let i=0;i<12;i++){
+/* initial */
+for(let i=0;i<10;i++){
     posts.push(img());
 }
 
-/* render */
+/* ================= RENDER ================= */
+
 function render(){
     feed.innerHTML="";
     grid.innerHTML="";
 
     posts.forEach((src,i)=>{
         feed.innerHTML += `
-        <div class="post" ondblclick="like(this)">
-            <img src="${src}">
-            <div class="heart">❤️</div>
+        <div class="post">
 
-            <input class="comment"
-            placeholder="comment..."
+            <img src="${src}">
+
+            <div class="actions">
+                <div class="left-actions">
+                    <span onclick="like(this)">❤️</span>
+                    <span>💬</span>
+                </div>
+                <span>📌</span>
+            </div>
+
+            <div class="info">
+                <div class="username">d1n4xx</div>
+                <div class="caption">My post 🚀</div>
+            </div>
+
+            <input class="comment-box"
+            placeholder="Add a comment..."
             onkeydown="comment(event,${i})">
+
         </div>`;
 
         grid.innerHTML += `<img src="${src}">`;
@@ -248,9 +272,8 @@ function render(){
 
 /* like */
 function like(el){
-    let h = el.querySelector(".heart");
-    h.classList.add("show");
-    setTimeout(()=>h.classList.remove("show"),600);
+    el.style.transform="scale(1.3)";
+    setTimeout(()=>el.style.transform="scale(1)",200);
 }
 
 /* comment */
@@ -261,35 +284,18 @@ function comment(e,i){
     }
 }
 
-/* INFINITE SCROLL (FIXED) */
-feed.addEventListener("scroll", ()=>{
+/* ================= INFINITE SCROLL ================= */
 
-    if(feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 100){
+window.addEventListener("scroll", ()=>{
+    if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100){
 
         for(let i=0;i<5;i++){
             posts.push(img());
         }
 
-        appendNew();
+        render();
     }
 });
-
-/* append only new posts */
-function appendNew(){
-    let start = posts.length - 5;
-
-    for(let i=start;i<posts.length;i++){
-        feed.innerHTML += `
-        <div class="post" ondblclick="like(this)">
-            <img src="${posts[i]}">
-            <div class="heart">❤️</div>
-
-            <input class="comment"
-            placeholder="comment..."
-            onkeydown="comment(event,${i})">
-        </div>`;
-    }
-}
 
 /* ================= REELS ================= */
 
@@ -306,7 +312,7 @@ function vid(){
 }
 
 function loadReels(){
-    for(let i=0;i<6;i++){
+    for(let i=0;i<5;i++){
         reels.innerHTML += `
         <div class="reel">
             <video src="${vid()}" autoplay muted loop playsinline></video>
