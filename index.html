@@ -23,7 +23,6 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 .page { display:none; padding-bottom:60px; }
 .active { display:block; }
 
-/* Header */
 .header {
     text-align:center;
     padding:15px;
@@ -34,11 +33,12 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 .feed { max-width:500px; margin:auto; }
 
 .post { border-bottom:1px solid #222; margin-bottom:20px; }
-
 .post img { width:100%; }
 
+/* Actions */
 .actions { padding:10px; }
 
+/* Comments */
 .comments { padding:10px; }
 
 /* Heart */
@@ -55,9 +55,7 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 /* Reels */
 .reel {
     height:100vh;
-    position:relative;
 }
-
 .reel video {
     width:100%;
     height:100%;
@@ -75,7 +73,11 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     margin:auto;
     overflow:hidden;
 }
-.profile-pic img { width:100%; height:100%; object-fit:cover; }
+.profile-pic img {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
 
 .grid {
     display:grid;
@@ -97,6 +99,8 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     justify-content:space-around;
     padding:10px;
 }
+.nav div { cursor:pointer; }
+
 </style>
 </head>
 
@@ -156,18 +160,23 @@ function showPage(id){
     document.getElementById(id).classList.add("active");
 }
 
-// POSTS
-let posts = JSON.parse(localStorage.getItem("posts")) || [
-    "https://picsum.photos/500/400?1",
-    "https://picsum.photos/500/450?2"
-];
+/* ---------- POSTS ---------- */
 
-// PROFILE
-if(localStorage.getItem("profile")){
-    profileImg.src = localStorage.getItem("profile");
+let posts = JSON.parse(localStorage.getItem("posts")) || [];
+
+function getRandomImage(){
+    return "https://picsum.photos/500/" + (300 + Math.floor(Math.random()*300)) + "?r=" + Math.random();
 }
 
-// RENDER
+// initial load
+if(posts.length===0){
+    for(let i=0;i<10;i++) posts.push(getRandomImage());
+}
+
+function loadMorePosts(){
+    for(let i=0;i<5;i++) posts.push(getRandomImage());
+}
+
 function render(){
     let feed = document.getElementById("feed");
     let grid = document.getElementById("grid");
@@ -182,9 +191,11 @@ function render(){
                 <img src="${src}" ondblclick="doubleLike(this)">
                 <div class="heart">❤️</div>
             </div>
+
             <div class="actions">
                 <span onclick="toggleLike(this)">♡</span>
             </div>
+
             <div class="comments">
                 <div id="c-${i}"></div>
                 <input placeholder="comment..." onkeydown="addComment(event,${i})">
@@ -195,19 +206,43 @@ function render(){
     });
 }
 
-// LIKE
+/* ---------- REELS ---------- */
+
+let videoList = [
+    "https://www.w3schools.com/html/mov_bbb.mp4",
+    "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    "https://samplelib.com/lib/preview/mp4/sample-10s.mp4"
+];
+
+let reels = document.getElementById("reels");
+
+function getRandomVideo(){
+    return videoList[Math.floor(Math.random()*videoList.length)];
+}
+
+function loadReels(){
+    for(let i=0;i<3;i++){
+        let vid = getRandomVideo();
+        reels.innerHTML += `
+        <div class="reel">
+            <video src="${vid}" autoplay muted controls></video>
+        </div>`;
+    }
+}
+
+/* ---------- INTERACTIONS ---------- */
+
 function toggleLike(el){
     el.innerText = el.innerText=="♡" ? "❤️" : "♡";
 }
 
-// DOUBLE TAP
 function doubleLike(img){
     let h = img.nextElementSibling;
     h.classList.add("show");
     setTimeout(()=>h.classList.remove("show"),600);
 }
 
-// COMMENT
 function addComment(e,i){
     if(e.key==="Enter"){
         document.getElementById("c-"+i).innerHTML += `<div>${e.target.value}</div>`;
@@ -215,7 +250,8 @@ function addComment(e,i){
     }
 }
 
-// UPLOAD
+/* ---------- UPLOAD ---------- */
+
 function upload(){
     let file = fileInput.files[0];
     if(!file) return;
@@ -229,7 +265,12 @@ function upload(){
     reader.readAsDataURL(file);
 }
 
-// PROFILE IMAGE
+/* ---------- PROFILE ---------- */
+
+if(localStorage.getItem("profile")){
+    profileImg.src = localStorage.getItem("profile");
+}
+
 function uploadProfile(){
     let file = profileInput.files[0];
     if(!file) return;
@@ -242,25 +283,31 @@ function uploadProfile(){
     reader.readAsDataURL(file);
 }
 
-// REELS FAKE
-let reels = document.getElementById("reels");
+/* ---------- SCROLL ---------- */
 
-function loadReels(){
-    for(let i=0;i<3;i++){
-        reels.innerHTML += `
-        <div class="reel">
-            <video src="https://www.w3schools.com/html/mov_bbb.mp4" autoplay loop muted></video>
-        </div>`;
-    }
-}
+let loading=false;
 
 window.addEventListener("scroll", ()=>{
-    if(window.innerHeight + window.scrollY >= document.body.offsetHeight-50){
-        loadReels();
+    if(!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight-50){
+        loading=true;
+
+        setTimeout(()=>{
+            if(home.classList.contains("active")){
+                loadMorePosts();
+                render();
+            }
+
+            if(reels.classList.contains("active")){
+                loadReels();
+            }
+
+            loading=false;
+        },800);
     }
 });
 
-// INITIAL
+/* ---------- INIT ---------- */
+
 render();
 loadReels();
 
