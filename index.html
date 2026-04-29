@@ -16,30 +16,8 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     align-items:center;
     font-size:40px;
     font-weight:bold;
-}
-
-/* Login */
-#login {
-    display:none;
-    text-align:center;
-    padding-top:120px;
-}
-
-input {
-    padding:10px;
-    margin:10px;
-    width:220px;
-    border:none;
-    border-radius:5px;
-}
-
-button {
-    padding:10px 20px;
-    border:none;
-    border-radius:5px;
-    background:#ff4b2b;
-    color:white;
-    cursor:pointer;
+    background:black;
+    z-index:10;
 }
 
 /* App */
@@ -71,7 +49,6 @@ button {
 
 /* Actions */
 .actions { padding:10px; font-size:20px; }
-.liked { color:red; }
 
 /* Caption */
 .caption { padding:0 10px; }
@@ -100,14 +77,6 @@ button {
 <!-- Splash -->
 <div id="splash">D1n4xx</div>
 
-<!-- Login -->
-<div id="login">
-    <h1>D1n4xx</h1>
-    <input id="username" placeholder="Username"><br>
-    <input type="password" placeholder="Password"><br>
-    <button onclick="login()">Login</button>
-</div>
-
 <!-- App -->
 <div id="app">
 
@@ -125,25 +94,19 @@ button {
 
 <script>
 
-// Splash → Login
+// Splash → App
 setTimeout(()=>{
-    splash.style.display="none";
-    login.style.display="block";
+    document.getElementById("splash").style.display="none";
+    document.getElementById("app").style.display="block";
 },2000);
 
-// Login → App
-function login(){
-    login.style.display="none";
-    app.style.display="block";
-}
-
-// Posts data
+// Posts
 let posts = [
     "https://picsum.photos/500/400?1",
     "https://picsum.photos/500/450?2"
 ];
 
-// Load saved
+// Load saved posts
 if(localStorage.getItem("posts")){
     posts = JSON.parse(localStorage.getItem("posts"));
 }
@@ -171,7 +134,7 @@ function render(){
                 <span onclick="toggleLike(this)">♡</span>
             </div>
 
-            <div class="caption">Cool post 😎</div>
+            <div class="caption">D1n4xx post 🔥</div>
 
             <div class="comments">
                 <div id="c-${i}"></div>
@@ -182,7 +145,7 @@ function render(){
     });
 }
 
-// Like button
+// Like
 function toggleLike(el){
     el.innerText = (el.innerText=="♡") ? "❤️" : "♡";
 }
@@ -216,6 +179,27 @@ function upload(){
     };
     reader.readAsDataURL(file);
 }
+
+// Infinite scroll
+let loading = false;
+
+function loadMore(){
+    for(let i=0;i<5;i++){
+        let newImg = "https://picsum.photos/500/" + (300 + Math.floor(Math.random()*200)) + "?random=" + Math.random();
+        posts.push(newImg);
+    }
+    render();
+}
+
+window.addEventListener("scroll", () => {
+    if (!loading && (window.innerHeight + window.scrollY >= document.body.offsetHeight - 50)) {
+        loading = true;
+        setTimeout(() => {
+            loadMore();
+            loading = false;
+        }, 800);
+    }
+});
 
 render();
 
