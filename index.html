@@ -23,6 +23,27 @@
             border-bottom: 1px solid #333;
         }
 
+        /* Stories */
+        .stories {
+            display: flex;
+            overflow-x: auto;
+            padding: 10px;
+            border-bottom: 1px solid #222;
+        }
+
+        .story {
+            text-align: center;
+            margin-right: 10px;
+        }
+
+        .story div {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: gray;
+            margin-bottom: 5px;
+        }
+
         /* Feed */
         .feed {
             max-width: 500px;
@@ -34,18 +55,36 @@
             margin-bottom: 20px;
         }
 
-        .post img {
-            width: 100%;
+        .topbar {
+            display: flex;
+            align-items: center;
+            padding: 10px;
         }
 
-        /* Actions */
+        .profile {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #555;
+        }
+
+        .username {
+            margin-left: 10px;
+            font-weight: bold;
+        }
+
+        .post img {
+            width: 100%;
+            cursor: pointer;
+        }
+
         .actions {
             padding: 10px;
+            font-size: 20px;
         }
 
         .like {
             cursor: pointer;
-            font-size: 22px;
         }
 
         .liked {
@@ -89,30 +128,50 @@
 
 <div class="header">📸 D1n4xx</div>
 
+<!-- Stories -->
+<div class="stories">
+    <div class="story"><div></div><small>You</small></div>
+    <div class="story"><div></div><small>Friend1</small></div>
+    <div class="story"><div></div><small>Friend2</small></div>
+    <div class="story"><div></div><small>Friend3</small></div>
+</div>
+
 <div class="feed">
 
+    <!-- Post 1 -->
     <div class="post">
+        <div class="topbar">
+            <div class="profile"></div>
+            <div class="username">d1n4xx</div>
+        </div>
+
         <img src="https://picsum.photos/500/400?random=1" onclick="openViewer(this.src)">
+
         <div class="actions">
             <span class="like" onclick="toggleLike(this)">♡</span>
+            <span> 💬</span>
+            <span> 📤</span>
         </div>
-        <div class="caption">Random shot 🚀</div>
+
+        <div class="caption"><b>d1n4xx</b> First post 🔥</div>
     </div>
 
+    <!-- Post 2 -->
     <div class="post">
+        <div class="topbar">
+            <div class="profile"></div>
+            <div class="username">d1n4xx</div>
+        </div>
+
         <img src="https://picsum.photos/500/450?random=2" onclick="openViewer(this.src)">
-        <div class="actions">
-            <span class="like" onclick="toggleLike(this)">♡</span>
-        </div>
-        <div class="caption">Another vibe 🔥</div>
-    </div>
 
-    <div class="post">
-        <img src="https://picsum.photos/500/420?random=3" onclick="openViewer(this.src)">
         <div class="actions">
             <span class="like" onclick="toggleLike(this)">♡</span>
+            <span> 💬</span>
+            <span> 📤</span>
         </div>
-        <div class="caption">D1n4xx style 😎</div>
+
+        <div class="caption"><b>d1n4xx</b> Clean vibes 😎</div>
     </div>
 
 </div>
