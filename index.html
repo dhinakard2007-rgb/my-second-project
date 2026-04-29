@@ -11,7 +11,7 @@ body {
     color:white;
 }
 
-/* SPLASH */
+/* Splash */
 #splash {
     position:fixed;
     width:100%;
@@ -24,18 +24,18 @@ body {
     z-index:10;
 }
 
-/* PAGES */
+/* Pages */
 .page { display:none; }
 .active { display:block; }
 
-/* HEADER */
+/* Header */
 .header {
     text-align:center;
     padding:15px;
     border-bottom:1px solid #333;
 }
 
-/* ================= FEED (INSTAGRAM STYLE) ================= */
+/* ================= FEED ================= */
 
 .feed {
     height:100vh;
@@ -59,7 +59,7 @@ body {
     object-fit:cover;
 }
 
-/* like animation */
+/* Heart animation */
 .heart {
     position:absolute;
     font-size:80px;
@@ -69,6 +69,7 @@ body {
     transform:translate(-50%,-50%) scale(0);
     opacity:0;
     transition:0.3s;
+    pointer-events:none;
 }
 
 .heart.show {
@@ -76,17 +77,12 @@ body {
     opacity:1;
 }
 
-/* comment */
-.post-ui {
+/* Comment */
+.comment-box {
     position:absolute;
     bottom:60px;
     left:10px;
-    right:10px;
-}
-
-.comment-box {
-    width:100%;
-    padding:5px;
+    width:90%;
 }
 
 /* ================= REELS ================= */
@@ -110,7 +106,7 @@ body {
 
 /* ================= PROFILE ================= */
 
-.profile-page {
+.profile {
     text-align:center;
     padding:20px;
 }
@@ -141,8 +137,7 @@ body {
     object-fit:cover;
 }
 
-/* ================= NAV ================= */
-
+/* NAV */
 .nav {
     position:fixed;
     bottom:0;
@@ -180,7 +175,7 @@ body {
 
     <div class="header">Profile</div>
 
-    <div class="profile-page">
+    <div class="profile">
 
         <div class="profile-pic" onclick="profileInput.click()">
             <img id="profileImg">
@@ -189,7 +184,6 @@ body {
         <input type="file" id="profileInput" hidden onchange="uploadProfile()">
 
         <h2>D1n4xx</h2>
-
     </div>
 
     <div class="grid" id="grid"></div>
@@ -204,10 +198,10 @@ body {
 
 <script>
 
-/* SPLASH */
+/* Splash */
 setTimeout(()=> splash.style.display="none",2000);
 
-/* NAV */
+/* Navigation */
 function show(id){
     document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
     document.getElementById(id).classList.add("active");
@@ -219,15 +213,13 @@ let feed = document.getElementById("feed");
 let grid = document.getElementById("grid");
 
 let posts = [];
-let count = 0;
 
-function newImage(){
-    count++;
-    return `https://picsum.photos/seed/${Date.now()+Math.random()+count}/500/900`;
+function img(){
+    return `https://picsum.photos/seed/${Math.random()}/500/900`;
 }
 
-// initial load
-for(let i=0;i<12;i++) posts.push(newImage());
+/* initial */
+for(let i=0;i<12;i++) posts.push(img());
 
 function render(){
     feed.innerHTML="";
@@ -239,42 +231,34 @@ function render(){
             <img src="${src}">
             <div class="heart">❤️</div>
 
-            <div class="post-ui">
-                <input class="comment-box"
-                placeholder="comment..."
-                onkeydown="comment(event,${i})">
-
-                <div id="c-${i}"></div>
-            </div>
+            <input class="comment-box"
+            placeholder="comment..."
+            onkeydown="comment(event,${i})">
         </div>`;
 
         grid.innerHTML += `<img src="${src}">`;
     });
 }
 
-/* LIKE */
+/* like */
 function like(el){
     let h = el.querySelector(".heart");
     h.classList.add("show");
     setTimeout(()=>h.classList.remove("show"),600);
 }
 
-/* COMMENTS */
+/* comments */
 function comment(e,i){
     if(e.key==="Enter"){
-        document.getElementById("c-"+i).innerHTML += `<div>💬 ${e.target.value}</div>`;
+        alert("💬 " + e.target.value);
         e.target.value="";
     }
 }
 
-/* INFINITE SCROLL */
+/* infinite scroll */
 window.addEventListener("scroll", ()=>{
-    if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 80){
-
-        for(let i=0;i<5;i++){
-            posts.push(newImage());
-        }
-
+    if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 50){
+        for(let i=0;i<5;i++) posts.push(img());
         render();
     }
 });
@@ -286,11 +270,10 @@ let reels = document.getElementById("reels");
 let videos = [
     "https://www.w3schools.com/html/mov_bbb.mp4",
     "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-    "https://samplelib.com/lib/preview/mp4/sample-10s.mp4"
+    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
 ];
 
-function randomVideo(){
+function video(){
     return videos[Math.floor(Math.random()*videos.length)];
 }
 
@@ -298,7 +281,7 @@ function loadReels(){
     for(let i=0;i<5;i++){
         reels.innerHTML += `
         <div class="reel">
-            <video src="${randomVideo()}" autoplay muted loop playsinline></video>
+            <video src="${video()}" autoplay muted loop playsinline></video>
         </div>`;
     }
 }
@@ -314,7 +297,7 @@ function uploadProfile(){
     let reader = new FileReader();
 
     reader.onload = e=>{
-        localStorage.setItem("profile",e.target.result);
+        localStorage.setItem("profile", e.target.result);
         profileImg.src = e.target.result;
     };
 
