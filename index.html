@@ -4,7 +4,12 @@
 <title>D1n4xx</title>
 
 <style>
-body { margin:0; font-family:Arial; background:black; color:white; }
+body {
+    margin:0;
+    font-family:Arial;
+    background:black;
+    color:white;
+}
 
 /* Splash */
 #splash {
@@ -29,41 +34,26 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     border-bottom:1px solid #333;
 }
 
-/* Feed */
-.feed { max-width:500px; margin:auto; }
-
-.post { border-bottom:1px solid #222; margin-bottom:20px; }
-.post img { width:100%; }
-
-/* Actions */
-.actions { padding:10px; }
-
-/* Comments */
-.comments { padding:10px; }
-
-/* Heart */
-.heart {
-    position:absolute;
-    top:50%; left:50%;
-    transform:translate(-50%,-50%) scale(0);
-    font-size:80px;
-    opacity:0;
-    transition:0.3s;
+/* FEED */
+.feed {
+    max-width:500px;
+    margin:auto;
 }
-.show { transform:translate(-50%,-50%) scale(1); opacity:1; }
 
-/* Reels */
-.reel {
-    height:100vh;
-}
-.reel video {
+.post img {
     width:100%;
-    height:100%;
-    object-fit:cover;
 }
 
-/* Profile */
-.profile-page { text-align:center; padding:20px; }
+/* COMMENTS */
+.comments {
+    padding:10px;
+}
+
+/* PROFILE */
+.profile-page {
+    text-align:center;
+    padding:20px;
+}
 
 .profile-pic {
     width:90px;
@@ -73,12 +63,14 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     margin:auto;
     overflow:hidden;
 }
+
 .profile-pic img {
     width:100%;
     height:100%;
     object-fit:cover;
 }
 
+/* GRID */
 .grid {
     display:grid;
     grid-template-columns:repeat(3,1fr);
@@ -89,7 +81,7 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     object-fit:cover;
 }
 
-/* Nav */
+/* NAV */
 .nav {
     position:fixed;
     bottom:0;
@@ -99,8 +91,25 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     justify-content:space-around;
     padding:10px;
 }
-.nav div { cursor:pointer; }
 
+/* REELS (TikTok style) */
+#reels {
+    height:100vh;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+}
+
+.reel {
+    height:100vh;
+    scroll-snap-align:start;
+    position:relative;
+}
+
+.reel video {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
 </style>
 </head>
 
@@ -110,6 +119,7 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 
 <!-- HOME -->
 <div id="home" class="page active">
+
     <div class="header">Home</div>
 
     <div style="text-align:center;">
@@ -129,17 +139,18 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     <div class="header">Profile</div>
 
     <div class="profile-page">
+
         <div class="profile-pic" onclick="profileInput.click()">
             <img id="profileImg">
         </div>
         <input type="file" id="profileInput" hidden onchange="uploadProfile()">
 
         <h2>d1n4xx</h2>
+
         <p><b id="followers">100</b> Followers</p>
     </div>
 
     <div class="grid" id="grid"></div>
-
 </div>
 
 <!-- NAV -->
@@ -151,31 +162,35 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 
 <script>
 
-// Splash
+/* ---------------- SPLASH ---------------- */
 setTimeout(()=> splash.style.display="none",2000);
 
-// Page switch
+/* ---------------- NAV ---------------- */
 function showPage(id){
     document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
     document.getElementById(id).classList.add("active");
 }
 
-/* ---------- POSTS ---------- */
+/* ---------------- FEED (INFINITE UNIQUE IMAGES) ---------------- */
 
 let posts = JSON.parse(localStorage.getItem("posts")) || [];
 
-function getRandomImage(){
-    return "https://picsum.photos/500/" + (300 + Math.floor(Math.random()*300)) + "?r=" + Math.random();
+function randomImage(){
+    return `https://picsum.photos/500/${300+Math.floor(Math.random()*400)}?t=${Date.now()+Math.random()}`;
 }
 
-// initial load
-if(posts.length===0){
-    for(let i=0;i<10;i++) posts.push(getRandomImage());
+// init
+if(posts.length === 0){
+    for(let i=0;i<12;i++) posts.push(randomImage());
 }
 
 function loadMorePosts(){
-    for(let i=0;i<5;i++) posts.push(getRandomImage());
+    for(let i=0;i<6;i++){
+        posts.push(randomImage());
+    }
 }
+
+/* ---------------- RENDER ---------------- */
 
 function render(){
     let feed = document.getElementById("feed");
@@ -184,73 +199,13 @@ function render(){
     feed.innerHTML="";
     grid.innerHTML="";
 
-    posts.forEach((src,i)=>{
-        feed.innerHTML += `
-        <div class="post">
-            <div style="position:relative;">
-                <img src="${src}" ondblclick="doubleLike(this)">
-                <div class="heart">❤️</div>
-            </div>
-
-            <div class="actions">
-                <span onclick="toggleLike(this)">♡</span>
-            </div>
-
-            <div class="comments">
-                <div id="c-${i}"></div>
-                <input placeholder="comment..." onkeydown="addComment(event,${i})">
-            </div>
-        </div>`;
-
+    posts.forEach(src=>{
+        feed.innerHTML += `<img src="${src}">`;
         grid.innerHTML += `<img src="${src}">`;
     });
 }
 
-/* ---------- REELS ---------- */
-
-let videoList = [
-    "https://www.w3schools.com/html/mov_bbb.mp4",
-    "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
-    "https://samplelib.com/lib/preview/mp4/sample-10s.mp4"
-];
-
-let reels = document.getElementById("reels");
-
-function getRandomVideo(){
-    return videoList[Math.floor(Math.random()*videoList.length)];
-}
-
-function loadReels(){
-    for(let i=0;i<3;i++){
-        let vid = getRandomVideo();
-        reels.innerHTML += `
-        <div class="reel">
-            <video src="${vid}" autoplay muted controls></video>
-        </div>`;
-    }
-}
-
-/* ---------- INTERACTIONS ---------- */
-
-function toggleLike(el){
-    el.innerText = el.innerText=="♡" ? "❤️" : "♡";
-}
-
-function doubleLike(img){
-    let h = img.nextElementSibling;
-    h.classList.add("show");
-    setTimeout(()=>h.classList.remove("show"),600);
-}
-
-function addComment(e,i){
-    if(e.key==="Enter"){
-        document.getElementById("c-"+i).innerHTML += `<div>${e.target.value}</div>`;
-        e.target.value="";
-    }
-}
-
-/* ---------- UPLOAD ---------- */
+/* ---------------- UPLOAD ---------------- */
 
 function upload(){
     let file = fileInput.files[0];
@@ -259,13 +214,13 @@ function upload(){
     let reader = new FileReader();
     reader.onload = e=>{
         posts.unshift(e.target.result);
-        localStorage.setItem("posts",JSON.stringify(posts));
+        localStorage.setItem("posts", JSON.stringify(posts));
         render();
     };
     reader.readAsDataURL(file);
 }
 
-/* ---------- PROFILE ---------- */
+/* ---------------- PROFILE ---------------- */
 
 if(localStorage.getItem("profile")){
     profileImg.src = localStorage.getItem("profile");
@@ -283,12 +238,75 @@ function uploadProfile(){
     reader.readAsDataURL(file);
 }
 
-/* ---------- SCROLL ---------- */
+/* ---------------- REELS (NO REPEATS, REAL VARIETY) ---------------- */
+
+let videoPool = [
+    "https://www.w3schools.com/html/mov_bbb.mp4",
+    "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
+    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4",
+    "https://samplelib.com/lib/preview/mp4/sample-10s.mp4",
+    "https://filesamples.com/samples/video/mp4/sample_640x360.mp4"
+];
+
+let usedVideos = [];
+
+function getUniqueVideo(){
+    let available = videoPool.filter(v => !usedVideos.includes(v));
+
+    if(available.length === 0){
+        usedVideos = [];
+        available = videoPool;
+    }
+
+    let video = available[Math.floor(Math.random()*available.length)];
+    usedVideos.push(video);
+
+    return video;
+}
+
+let reels = document.getElementById("reels");
+
+function loadReels(count=3){
+    for(let i=0;i<count;i++){
+        let vid = getUniqueVideo();
+
+        reels.innerHTML += `
+        <div class="reel">
+            <video src="${vid}" autoplay muted loop playsinline></video>
+        </div>`;
+    }
+}
+
+/* autoplay only visible */
+function handlePlayback(){
+    let videos = document.querySelectorAll(".reel video");
+
+    videos.forEach(v=>{
+        let rect = v.getBoundingClientRect();
+
+        if(rect.top >= 0 && rect.top < window.innerHeight/2){
+            v.play();
+        } else {
+            v.pause();
+        }
+    });
+}
+
+/* infinite reels */
+reels.addEventListener("scroll", ()=>{
+    handlePlayback();
+
+    if(reels.scrollTop + reels.clientHeight >= reels.scrollHeight - 50){
+        loadReels(2);
+    }
+});
+
+/* ---------------- SCROLL FEED ---------------- */
 
 let loading=false;
 
 window.addEventListener("scroll", ()=>{
-    if(!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight-50){
+    if(!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight - 50){
         loading=true;
 
         setTimeout(()=>{
@@ -297,19 +315,15 @@ window.addEventListener("scroll", ()=>{
                 render();
             }
 
-            if(reels.classList.contains("active")){
-                loadReels();
-            }
-
             loading=false;
         },800);
     }
 });
 
-/* ---------- INIT ---------- */
+/* ---------------- INIT ---------------- */
 
 render();
-loadReels();
+loadReels(5);
 
 </script>
 
