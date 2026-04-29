@@ -60,7 +60,7 @@ body {
     object-fit:cover;
 }
 
-/* ❤️ Animation */
+/* heart */
 .heart {
     position:absolute;
     font-size:90px;
@@ -70,6 +70,7 @@ body {
     transform:translate(-50%,-50%) scale(0);
     opacity:0;
     transition:0.3s;
+    pointer-events:none;
 }
 
 .heart.show {
@@ -77,12 +78,13 @@ body {
     opacity:1;
 }
 
-/* Comment box */
+/* comment */
 .comment {
     position:absolute;
     bottom:70px;
     left:10px;
     width:90%;
+    padding:5px;
 }
 
 /* ================= REELS ================= */
@@ -208,7 +210,7 @@ function show(id){
     document.getElementById(id).classList.add("active");
 }
 
-/* ================= INFINITE IMAGES ================= */
+/* ================= FEED ================= */
 
 let feed = document.getElementById("feed");
 let grid = document.getElementById("grid");
@@ -224,6 +226,7 @@ for(let i=0;i<12;i++){
     posts.push(img());
 }
 
+/* render */
 function render(){
     feed.innerHTML="";
     grid.innerHTML="";
@@ -243,14 +246,14 @@ function render(){
     });
 }
 
-/* ❤️ LIKE */
+/* like */
 function like(el){
     let h = el.querySelector(".heart");
     h.classList.add("show");
     setTimeout(()=>h.classList.remove("show"),600);
 }
 
-/* 💬 COMMENT */
+/* comment */
 function comment(e,i){
     if(e.key==="Enter"){
         alert("💬 " + e.target.value);
@@ -258,15 +261,35 @@ function comment(e,i){
     }
 }
 
-/* 🔄 INFINITE SCROLL */
-window.addEventListener("scroll", ()=>{
-    if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 80){
+/* INFINITE SCROLL (FIXED) */
+feed.addEventListener("scroll", ()=>{
+
+    if(feed.scrollTop + feed.clientHeight >= feed.scrollHeight - 100){
+
         for(let i=0;i<5;i++){
             posts.push(img());
         }
-        render();
+
+        appendNew();
     }
 });
+
+/* append only new posts */
+function appendNew(){
+    let start = posts.length - 5;
+
+    for(let i=start;i<posts.length;i++){
+        feed.innerHTML += `
+        <div class="post" ondblclick="like(this)">
+            <img src="${posts[i]}">
+            <div class="heart">❤️</div>
+
+            <input class="comment"
+            placeholder="comment..."
+            onkeydown="comment(event,${i})">
+        </div>`;
+    }
+}
 
 /* ================= REELS ================= */
 
@@ -283,7 +306,7 @@ function vid(){
 }
 
 function loadReels(){
-    for(let i=0;i<5;i++){
+    for(let i=0;i<6;i++){
         reels.innerHTML += `
         <div class="reel">
             <video src="${vid()}" autoplay muted loop playsinline></video>
@@ -302,7 +325,7 @@ function uploadProfile(){
     let r = new FileReader();
 
     r.onload = e=>{
-        localStorage.setItem("profile", e.target.result);
+        localStorage.setItem("profile",e.target.result);
         profileImg.src = e.target.result;
     };
 
