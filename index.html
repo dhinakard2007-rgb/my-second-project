@@ -15,7 +15,6 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     justify-content:center;
     align-items:center;
     font-size:40px;
-    font-weight:bold;
     background:black;
     z-index:10;
 }
@@ -24,6 +23,7 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 .page { display:none; padding-bottom:60px; }
 .active { display:block; }
 
+/* Header */
 .header {
     text-align:center;
     padding:15px;
@@ -33,14 +33,36 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 /* Feed */
 .feed { max-width:500px; margin:auto; }
 
+.post { border-bottom:1px solid #222; margin-bottom:20px; }
+
 .post img { width:100%; }
 
-.topbar { display:flex; padding:10px; }
-.profile { width:35px; height:35px; border-radius:50%; background:#555; }
-.username { margin-left:10px; }
-
 .actions { padding:10px; }
-.caption { padding:0 10px; }
+
+.comments { padding:10px; }
+
+/* Heart */
+.heart {
+    position:absolute;
+    top:50%; left:50%;
+    transform:translate(-50%,-50%) scale(0);
+    font-size:80px;
+    opacity:0;
+    transition:0.3s;
+}
+.show { transform:translate(-50%,-50%) scale(1); opacity:1; }
+
+/* Reels */
+.reel {
+    height:100vh;
+    position:relative;
+}
+
+.reel video {
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
 
 /* Profile */
 .profile-page { text-align:center; padding:20px; }
@@ -53,23 +75,12 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     margin:auto;
     overflow:hidden;
 }
-
 .profile-pic img { width:100%; height:100%; object-fit:cover; }
 
-.stats {
-    display:flex;
-    justify-content:center;
-    gap:20px;
-    margin:15px;
-}
-
-/* Grid */
 .grid {
     display:grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap:2px;
+    grid-template-columns:repeat(3,1fr);
 }
-
 .grid img {
     width:100%;
     height:120px;
@@ -95,13 +106,18 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 
 <!-- HOME -->
 <div id="home" class="page active">
-    <div class="header">📸 D1n4xx</div>
-    <div style="text-align:center; padding:10px;">
+    <div class="header">Home</div>
+
+    <div style="text-align:center;">
         <input type="file" id="fileInput">
         <button onclick="upload()">Upload</button>
     </div>
-    <div class="feed" id="feed"></div>
+
+    <div id="feed"></div>
 </div>
+
+<!-- REELS -->
+<div id="reels" class="page"></div>
 
 <!-- PROFILE -->
 <div id="profile" class="page">
@@ -109,25 +125,15 @@ body { margin:0; font-family:Arial; background:black; color:white; }
     <div class="header">Profile</div>
 
     <div class="profile-page">
-
-        <div class="profile-pic" onclick="document.getElementById('profileInput').click()">
+        <div class="profile-pic" onclick="profileInput.click()">
             <img id="profileImg">
         </div>
         <input type="file" id="profileInput" hidden onchange="uploadProfile()">
 
         <h2>d1n4xx</h2>
-
-        <div class="stats">
-            <div><b id="postCount">0</b><br>Posts</div>
-            <div onclick="changeFollowers()"><b id="followers">100</b><br>Followers</div>
-            <div><b>50</b><br>Following</div>
-        </div>
-
-        <p>Tap profile pic to change 👆</p>
-
+        <p><b id="followers">100</b> Followers</p>
     </div>
 
-    <!-- Grid -->
     <div class="grid" id="grid"></div>
 
 </div>
@@ -135,13 +141,14 @@ body { margin:0; font-family:Arial; background:black; color:white; }
 <!-- NAV -->
 <div class="nav">
     <div onclick="showPage('home')">🏠</div>
+    <div onclick="showPage('reels')">🎬</div>
     <div onclick="showPage('profile')">👤</div>
 </div>
 
 <script>
 
 // Splash
-setTimeout(()=>{ splash.style.display="none"; },2000);
+setTimeout(()=> splash.style.display="none",2000);
 
 // Page switch
 function showPage(id){
@@ -149,55 +156,66 @@ function showPage(id){
     document.getElementById(id).classList.add("active");
 }
 
-// Posts
+// POSTS
 let posts = JSON.parse(localStorage.getItem("posts")) || [
     "https://picsum.photos/500/400?1",
     "https://picsum.photos/500/450?2"
 ];
 
-// Profile pic
+// PROFILE
 if(localStorage.getItem("profile")){
-    document.getElementById("profileImg").src = localStorage.getItem("profile");
+    profileImg.src = localStorage.getItem("profile");
 }
 
-// Followers
-let followers = localStorage.getItem("followers") || 100;
-document.getElementById("followers").innerText = followers;
-
-function changeFollowers(){
-    followers++;
-    localStorage.setItem("followers", followers);
-    document.getElementById("followers").innerText = followers;
-}
-
-// Render
+// RENDER
 function render(){
     let feed = document.getElementById("feed");
     let grid = document.getElementById("grid");
 
     feed.innerHTML="";
     grid.innerHTML="";
-    document.getElementById("postCount").innerText = posts.length;
 
     posts.forEach((src,i)=>{
-
-        // Feed
         feed.innerHTML += `
         <div class="post">
-            <div class="topbar">
-                <div class="profile"></div>
-                <div class="username">d1n4xx</div>
+            <div style="position:relative;">
+                <img src="${src}" ondblclick="doubleLike(this)">
+                <div class="heart">❤️</div>
             </div>
-            <img src="${src}">
-            <div class="caption">🔥 D1n4xx</div>
+            <div class="actions">
+                <span onclick="toggleLike(this)">♡</span>
+            </div>
+            <div class="comments">
+                <div id="c-${i}"></div>
+                <input placeholder="comment..." onkeydown="addComment(event,${i})">
+            </div>
         </div>`;
 
-        // Grid
         grid.innerHTML += `<img src="${src}">`;
     });
 }
 
-// Upload post
+// LIKE
+function toggleLike(el){
+    el.innerText = el.innerText=="♡" ? "❤️" : "♡";
+}
+
+// DOUBLE TAP
+function doubleLike(img){
+    let h = img.nextElementSibling;
+    h.classList.add("show");
+    setTimeout(()=>h.classList.remove("show"),600);
+}
+
+// COMMENT
+function addComment(e,i){
+    if(e.key==="Enter"){
+        document.getElementById("c-"+i).innerHTML += `<div>${e.target.value}</div>`;
+        e.target.value="";
+    }
+}
+
+// UPLOAD
 function upload(){
     let file = fileInput.files[0];
     if(!file) return;
@@ -205,13 +223,13 @@ function upload(){
     let reader = new FileReader();
     reader.onload = e=>{
         posts.unshift(e.target.result);
-        localStorage.setItem("posts", JSON.stringify(posts));
+        localStorage.setItem("posts",JSON.stringify(posts));
         render();
     };
     reader.readAsDataURL(file);
 }
 
-// Upload profile
+// PROFILE IMAGE
 function uploadProfile(){
     let file = profileInput.files[0];
     if(!file) return;
@@ -219,27 +237,32 @@ function uploadProfile(){
     let reader = new FileReader();
     reader.onload = e=>{
         localStorage.setItem("profile", e.target.result);
-        document.getElementById("profileImg").src = e.target.result;
+        profileImg.src = e.target.result;
     };
     reader.readAsDataURL(file);
 }
 
-// Infinite scroll
-let loading=false;
+// REELS FAKE
+let reels = document.getElementById("reels");
+
+function loadReels(){
+    for(let i=0;i<3;i++){
+        reels.innerHTML += `
+        <div class="reel">
+            <video src="https://www.w3schools.com/html/mov_bbb.mp4" autoplay loop muted></video>
+        </div>`;
+    }
+}
+
 window.addEventListener("scroll", ()=>{
-    if(!loading && window.innerHeight + window.scrollY >= document.body.offsetHeight - 50){
-        loading=true;
-        setTimeout(()=>{
-            for(let i=0;i<5;i++){
-                posts.push("https://picsum.photos/500/"+(300+Math.random()*200));
-            }
-            render();
-            loading=false;
-        },800);
+    if(window.innerHeight + window.scrollY >= document.body.offsetHeight-50){
+        loadReels();
     }
 });
 
+// INITIAL
 render();
+loadReels();
 
 </script>
 
