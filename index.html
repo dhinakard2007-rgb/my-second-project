@@ -2,78 +2,100 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Insta Feed Clone</title>
+<title>Insta Ultra Pro Max</title>
 
 <style>
-body {
+body{
     margin:0;
     font-family:Arial;
     background:black;
     color:white;
 }
 
-/* Feed container */
-.feed {
+/* NAV */
+.nav{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    background:#111;
+    display:flex;
+    justify-content:space-around;
+    padding:10px;
+    z-index:10;
+}
+
+/* PAGES */
+.page{display:none;}
+.active{display:block;}
+
+/* ================= STORIES ================= */
+.stories{
+    display:flex;
+    overflow-x:auto;
+    padding:10px;
+    gap:10px;
+    border-bottom:1px solid #222;
+}
+
+.story{
+    min-width:60px;
+    text-align:center;
+}
+
+.story img{
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    border:2px solid pink;
+}
+
+/* ================= FEED ================= */
+.feed{
     max-width:500px;
     margin:auto;
     padding-bottom:80px;
 }
 
-/* Post card */
-.post {
+.post{
     background:#111;
-    margin:12px 10px;
+    margin:12px;
     border-radius:12px;
     overflow:hidden;
 }
 
-/* image */
-.post img {
+.post img{
     width:100%;
-    display:block;
 }
 
-/* actions row */
-.actions {
+.actions{
     display:flex;
     justify-content:space-between;
     padding:10px;
     font-size:22px;
 }
 
-.left {
+.left{
     display:flex;
     gap:15px;
-    cursor:pointer;
 }
 
-/* info */
-.info {
-    padding:0 10px 10px 10px;
+.info{
+    padding:0 10px 10px;
 }
 
-.username {
-    font-weight:bold;
-    font-size:14px;
-}
+.username{font-weight:bold;}
+.caption{color:#ccc;font-size:13px;}
 
-.caption {
-    color:#ccc;
-    font-size:13px;
-    margin-top:3px;
-}
-
-/* comment */
-.comment {
-    width:94%;
-    margin:5px 10px 10px 10px;
+.comment{
+    width:95%;
+    margin:5px 10px 10px;
     padding:6px;
     border-radius:6px;
     border:none;
 }
 
 /* heart animation */
-.heart {
+.heart{
     position:absolute;
     font-size:80px;
     color:red;
@@ -82,16 +104,64 @@ body {
     transform:translate(-50%,-50%) scale(0);
     opacity:0;
     transition:0.3s;
-    pointer-events:none;
 }
 
-.post-wrap {
+.post-wrap{
     position:relative;
 }
 
-.heart.show {
+.heart.show{
     transform:translate(-50%,-50%) scale(1);
     opacity:1;
+}
+
+/* ================= REELS ================= */
+.reel{
+    height:100vh;
+    scroll-snap-align:start;
+}
+
+.reel video{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+#reels{
+    height:100vh;
+    overflow-y:scroll;
+    scroll-snap-type:y mandatory;
+}
+
+/* ================= PROFILE ================= */
+.profile{
+    text-align:center;
+    padding:20px;
+}
+
+.pfp{
+    width:90px;
+    height:90px;
+    border-radius:50%;
+    margin:auto;
+    overflow:hidden;
+    background:#333;
+}
+
+.pfp img{
+    width:100%;
+    height:100%;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+}
+
+.grid img{
+    width:100%;
+    height:120px;
+    object-fit:cover;
 }
 
 </style>
@@ -99,75 +169,145 @@ body {
 
 <body>
 
+<!-- HOME -->
+<div id="home" class="page active">
+
+<div class="stories" id="stories"></div>
+
 <div class="feed" id="feed"></div>
+
+</div>
+
+<!-- REELS -->
+<div id="reels" class="page"></div>
+
+<!-- PROFILE -->
+<div id="profile" class="page">
+
+<div class="profile">
+<div class="pfp" onclick="file.click()">
+<img id="profileImg">
+</div>
+
+<input type="file" id="file" hidden onchange="upload()">
+
+<h3>D1n4xx</h3>
+</div>
+
+<div class="grid" id="grid"></div>
+
+</div>
+
+<!-- NAV -->
+<div class="nav">
+<div onclick="show('home')">🏠</div>
+<div onclick="show('reels')">🎬</div>
+<div onclick="show('profile')">👤</div>
+</div>
 
 <script>
 
-let feed = document.getElementById("feed");
-let posts = [];
-
-/* random images */
-function img(){
-    return "https://picsum.photos/seed/" + Math.random() + "/500/600";
+function show(id){
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
 }
 
-/* initial posts */
+/* ================= STORIES ================= */
+let stories=document.getElementById("stories");
+
 for(let i=0;i<8;i++){
-    posts.push(img());
+    stories.innerHTML+=`
+    <div class="story">
+        <img src="https://i.pravatar.cc/100?img=${i+1}">
+        <small>User</small>
+    </div>`;
 }
 
-/* render */
+/* ================= FEED ================= */
+let feed=document.getElementById("feed");
+let posts=[];
+
+function img(){
+    return "https://picsum.photos/seed/"+Math.random()+"/500/600";
+}
+
+for(let i=0;i<10;i++) posts.push(img());
+
 function render(){
     feed.innerHTML="";
-
     posts.forEach((src,i)=>{
-        feed.innerHTML += `
+        feed.innerHTML+=`
         <div class="post">
 
-            <div class="post-wrap" ondblclick="like(this)">
-                <img src="${src}">
-                <div class="heart">❤️</div>
-            </div>
+        <div class="post-wrap" ondblclick="like(this)">
+            <img src="${src}">
+            <div class="heart">❤️</div>
+        </div>
 
-            <div class="actions">
-                <div class="left">
-                    <span>❤️</span>
-                    <span>💬</span>
-                </div>
-                <span>📌</span>
+        <div class="actions">
+            <div class="left">
+                <span>❤️</span>
+                <span>💬</span>
             </div>
+            <span>📌</span>
+        </div>
 
-            <div class="info">
-                <div class="username">d1n4xx</div>
-                <div class="caption">Enjoying life 🚀</div>
-            </div>
+        <div class="info">
+            <div class="username">user_${i}</div>
+            <div class="caption">Ultra pro max post 🔥</div>
+        </div>
 
-            <input class="comment" placeholder="Add a comment...">
+        <input class="comment" placeholder="Add comment...">
 
         </div>`;
     });
 }
 
-/* like animation */
 function like(el){
-    let h = el.querySelector(".heart");
+    let h=el.querySelector(".heart");
     h.classList.add("show");
-    setTimeout(()=>h.classList.remove("show"),600);
+    setTimeout(()=>h.classList.remove("show"),500);
 }
 
 /* infinite scroll */
-window.addEventListener("scroll", ()=>{
-    if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100){
-
-        for(let i=0;i<5;i++){
-            posts.push(img());
-        }
-
+window.addEventListener("scroll",()=>{
+    if(window.innerHeight+window.scrollY>=document.body.offsetHeight-100){
+        for(let i=0;i<5;i++) posts.push(img());
         render();
     }
 });
 
-/* init */
+/* ================= REELS ================= */
+let reels=document.getElementById("reels");
+
+let vids=[
+"https://www.w3schools.com/html/mov_bbb.mp4",
+"https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"
+];
+
+for(let i=0;i<5;i++){
+reels.innerHTML+=`
+<div class="reel">
+<video src="${vids[i%2]}" autoplay muted loop></video>
+</div>`;
+}
+
+/* ================= PROFILE ================= */
+if(localStorage.getItem("p")){
+profileImg.src=localStorage.getItem("p");
+}
+
+function upload(){
+let f=file.files[0];
+let r=new FileReader();
+r.onload=e=>{
+localStorage.setItem("p",e.target.result);
+profileImg.src=e.target.result;
+};
+r.readAsDataURL(f);
+}
+
+/* INIT */
 render();
 
 </script>
