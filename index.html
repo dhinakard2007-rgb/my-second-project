@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>D1n4xx</title>
+<title>Insta Feed Clone</title>
 
 <style>
 body {
@@ -12,39 +12,14 @@ body {
     color:white;
 }
 
-/* Splash */
-#splash {
-    position:fixed;
-    width:100%;
-    height:100%;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    font-size:40px;
-    background:black;
-    z-index:10;
-}
-
-/* Pages */
-.page { display:none; }
-.active { display:block; }
-
-/* HEADER */
-.header {
-    text-align:center;
-    padding:12px;
-    border-bottom:1px solid #333;
-}
-
-/* ================= FEED ================= */
-
+/* Feed container */
 .feed {
-    height:100vh;
-    overflow-y:auto;
+    max-width:500px;
+    margin:auto;
     padding-bottom:80px;
 }
 
-/* Instagram card post */
+/* Post card */
 .post {
     background:#111;
     margin:12px 10px;
@@ -58,7 +33,7 @@ body {
     display:block;
 }
 
-/* actions */
+/* actions row */
 .actions {
     display:flex;
     justify-content:space-between;
@@ -66,7 +41,7 @@ body {
     font-size:22px;
 }
 
-.left-actions {
+.left {
     display:flex;
     gap:15px;
     cursor:pointer;
@@ -79,90 +54,44 @@ body {
 
 .username {
     font-weight:bold;
+    font-size:14px;
 }
 
 .caption {
     color:#ccc;
-    font-size:14px;
+    font-size:13px;
     margin-top:3px;
 }
 
 /* comment */
-.comment-box {
-    width:95%;
+.comment {
+    width:94%;
     margin:5px 10px 10px 10px;
     padding:6px;
     border-radius:6px;
     border:none;
 }
 
-/* ================= REELS ================= */
-
-#reels {
-    height:100vh;
-    overflow-y:scroll;
-    scroll-snap-type:y mandatory;
+/* heart animation */
+.heart {
+    position:absolute;
+    font-size:80px;
+    color:red;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%) scale(0);
+    opacity:0;
+    transition:0.3s;
+    pointer-events:none;
 }
 
-.reel {
-    height:100vh;
-    scroll-snap-align:start;
+.post-wrap {
+    position:relative;
 }
 
-.reel video {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-/* ================= PROFILE ================= */
-
-.profile {
-    text-align:center;
-    padding:20px;
-}
-
-.profile-pic {
-    width:90px;
-    height:90px;
-    border-radius:50%;
-    overflow:hidden;
-    margin:auto;
-    background:#444;
-}
-
-.profile-pic img {
-    width:100%;
-    height:100%;
-    object-fit:cover;
-}
-
-.grid {
-    display:grid;
-    grid-template-columns:repeat(3,1fr);
-}
-
-.grid img {
-    width:100%;
-    height:120px;
-    object-fit:cover;
-}
-
-/* ================= NAV ================= */
-
-.nav {
-    position:fixed;
-    bottom:0;
-    width:100%;
-    background:#111;
-    display:flex;
-    justify-content:space-around;
-    padding:10px;
-}
-
-.nav div {
-    font-size:22px;
-    cursor:pointer;
+.heart.show {
+    transform:translate(-50%,-50%) scale(1);
+    opacity:1;
 }
 
 </style>
@@ -170,86 +99,39 @@ body {
 
 <body>
 
-<!-- SPLASH -->
-<div id="splash">D1n4xx</div>
-
-<!-- HOME -->
-<div id="home" class="page active">
-    <div class="header">Home</div>
-    <div id="feed" class="feed"></div>
-</div>
-
-<!-- REELS -->
-<div id="reels" class="page"></div>
-
-<!-- PROFILE -->
-<div id="profile" class="page">
-
-    <div class="header">Profile</div>
-
-    <div class="profile">
-
-        <div class="profile-pic" onclick="file.click()">
-            <img id="profileImg">
-        </div>
-
-        <input type="file" id="file" hidden onchange="uploadProfile()">
-
-        <h2>D1n4xx</h2>
-    </div>
-
-    <div class="grid" id="grid"></div>
-</div>
-
-<!-- NAV -->
-<div class="nav">
-    <div onclick="show('home')">🏠</div>
-    <div onclick="show('reels')">🎬</div>
-    <div onclick="show('profile')">👤</div>
-</div>
+<div class="feed" id="feed"></div>
 
 <script>
 
-/* splash */
-setTimeout(()=> splash.style.display="none",2000);
-
-/* navigation */
-function show(id){
-    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
-    document.getElementById(id).classList.add("active");
-}
-
-/* ================= DATA ================= */
-
 let feed = document.getElementById("feed");
-let grid = document.getElementById("grid");
-
 let posts = [];
 
+/* random images */
 function img(){
-    return "https://picsum.photos/seed/" + Math.random() + "/500/900";
+    return "https://picsum.photos/seed/" + Math.random() + "/500/600";
 }
 
-/* initial */
-for(let i=0;i<10;i++){
+/* initial posts */
+for(let i=0;i<8;i++){
     posts.push(img());
 }
 
-/* ================= RENDER ================= */
-
+/* render */
 function render(){
     feed.innerHTML="";
-    grid.innerHTML="";
 
     posts.forEach((src,i)=>{
         feed.innerHTML += `
         <div class="post">
 
-            <img src="${src}">
+            <div class="post-wrap" ondblclick="like(this)">
+                <img src="${src}">
+                <div class="heart">❤️</div>
+            </div>
 
             <div class="actions">
-                <div class="left-actions">
-                    <span onclick="like(this)">❤️</span>
+                <div class="left">
+                    <span>❤️</span>
                     <span>💬</span>
                 </div>
                 <span>📌</span>
@@ -257,35 +139,23 @@ function render(){
 
             <div class="info">
                 <div class="username">d1n4xx</div>
-                <div class="caption">My post 🚀</div>
+                <div class="caption">Enjoying life 🚀</div>
             </div>
 
-            <input class="comment-box"
-            placeholder="Add a comment..."
-            onkeydown="comment(event,${i})">
+            <input class="comment" placeholder="Add a comment...">
 
         </div>`;
-
-        grid.innerHTML += `<img src="${src}">`;
     });
 }
 
-/* like */
+/* like animation */
 function like(el){
-    el.style.transform="scale(1.3)";
-    setTimeout(()=>el.style.transform="scale(1)",200);
+    let h = el.querySelector(".heart");
+    h.classList.add("show");
+    setTimeout(()=>h.classList.remove("show"),600);
 }
 
-/* comment */
-function comment(e,i){
-    if(e.key==="Enter"){
-        alert("💬 " + e.target.value);
-        e.target.value="";
-    }
-}
-
-/* ================= INFINITE SCROLL ================= */
-
+/* infinite scroll */
 window.addEventListener("scroll", ()=>{
     if(window.innerHeight + window.scrollY >= document.body.offsetHeight - 100){
 
@@ -297,50 +167,8 @@ window.addEventListener("scroll", ()=>{
     }
 });
 
-/* ================= REELS ================= */
-
-let reels = document.getElementById("reels");
-
-let videos = [
-    "https://www.w3schools.com/html/mov_bbb.mp4",
-    "https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4",
-    "https://samplelib.com/lib/preview/mp4/sample-5s.mp4"
-];
-
-function vid(){
-    return videos[Math.floor(Math.random()*videos.length)];
-}
-
-function loadReels(){
-    for(let i=0;i<5;i++){
-        reels.innerHTML += `
-        <div class="reel">
-            <video src="${vid()}" autoplay muted loop playsinline></video>
-        </div>`;
-    }
-}
-
-/* ================= PROFILE ================= */
-
-if(localStorage.getItem("profile")){
-    profileImg.src = localStorage.getItem("profile");
-}
-
-function uploadProfile(){
-    let f = file.files[0];
-    let r = new FileReader();
-
-    r.onload = e=>{
-        localStorage.setItem("profile",e.target.result);
-        profileImg.src = e.target.result;
-    };
-
-    r.readAsDataURL(f);
-}
-
-/* INIT */
+/* init */
 render();
-loadReels();
 
 </script>
 
